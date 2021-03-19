@@ -16,3 +16,8 @@ from qcodes.instrument_drivers.QuantumDesign.DynaCoolPPMS.DynaCool import DynaCo
 Additionally, the Mundy Lab uses a Dual Phase Lock-in Amplifier, the SR860.\
 \
 Documentation for the Dynacool PPMS can be found [here](https://pymeasure.readthedocs.io/en/latest/api/instruments/srs/sr860.html)
+
+## Documentation
+
+| Name | Usage | URL |
+| --- | --- | --- |
