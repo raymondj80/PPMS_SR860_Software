@@ -5,7 +5,7 @@ Python Software to interface with the Dynacool PPMS and SR860 Lock-in Amplifier
 
 The Dynacool PPMS is a Physical Property Measurement System from Quantum Design used to measure electrical transport, magnetometry, thermal measurements, etc.\
 \
-General Infoabout the PPMS can be found [here](https://www.qdusa.com/products/dynacool.html) 
+General Info about the PPMS can be found [here](https://www.qdusa.com/products/dynacool.html) 
 
 ### Import 
 
