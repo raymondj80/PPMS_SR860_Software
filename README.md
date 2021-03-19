@@ -3,7 +3,7 @@ Python Software to interface with the Dynacool PPMS and SR860 Lock-in Amplifier
 
 ## Introduction
 
-The Dynacool PPMS is a Physical Property Measurement System from Quantum Design used to measure electrical transport, magnetometry, thermal measurements, etc.\
+The **Dynacool PPMS** is a Physical Property Measurement System from Quantum Design used to measure electrical transport, magnetometry, thermal measurements, etc.\
 \
 General Info about the PPMS can be found [here](https://www.qdusa.com/products/dynacool.html) 
 
@@ -13,7 +13,7 @@ General Info about the PPMS can be found [here](https://www.qdusa.com/products/d
 from qcodes.instrument_drivers.QuantumDesign.DynaCoolPPMS.DynaCool import DynaCool
 ```
 
-Additionally, the Mundy Lab uses a Dual Phase Lock-in Amplifier, the SR860.\
+Additionally, the Mundy Lab uses a Dual Phase Lock-in Amplifier, the **SR860**.\
 \
 General Info about the SR860 Lock-in can be found [here](https://www.thinksrs.com/products/sr860.html)
 
