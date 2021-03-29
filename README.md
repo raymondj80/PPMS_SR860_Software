@@ -25,4 +25,5 @@ General Info about the SR860 Lock-in can be found [here](https://www.thinksrs.co
 | SR860 Lock-In | Docs | https://pymeasure.readthedocs.io/en/latest/api/instruments/srs/sr860.html
 | Keithley 6221 | AC/DC current source | https://pymeasure.readthedocs.io/en/latest/api/instruments/keithley/keithley6221.html
 | Instrumental | lab controls | https://instrumental-lib.readthedocs.io/en/stable/index.html
+| PlotLy Dash | plot/control interface | https://dash.plotly.com/
 
