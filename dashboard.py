@@ -19,6 +19,7 @@ app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = html.Div(
     [
+        
         dcc.Graph(id='live-graph', animate=True),
         dcc.Interval(
             id='graph-update',
@@ -123,6 +124,42 @@ def update_graph(input_data):
     return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)]),
                                                 yaxis = dict(range=[min(Y), max(Y)])
     )}
+
+# @app.route('/')
+# def index():
+#     l = []
+#     # work on copy of joblist,
+#     for job in list(joblist):
+#         # task may be expired, refresh() will fail
+#         try:
+#             job.refresh()
+#         except rq.exceptions.NoSuchJobError:
+#             joblist.remove(job)
+#             continue
+
+#         l.append({
+#             'id': job.get_id(),
+#             'state': job.get_status(),
+#             'progress': job.meta.get('progress'),
+#             'result': job.result
+#             })
+
+#     return render_template('index.html', joblist=l)
+
+
+# @app.route('/enqueuejob', methods=['GET', 'POST'])
+# def enqueuejob():
+#     job = jobs.approximate_pi.queue(int(request.form['num_iterations']))
+#     joblist.append(job)
+#     return redirect('/')
+
+
+# @app.route('/deletejob', methods=['GET', 'POST'])
+# def deletejob():
+#     if request.args.get('jobid'):
+#         job = rq.job.Job.fetch(request.args.get('jobid'), connection=jobs.rq.connection)
+#         job.delete()
+#     return redirect('/')
 
 
 
