@@ -25,31 +25,36 @@ class Server():
         print('Creating socket at %s:%s...' %(self.HOST, self.PORT))
         
         keep_running =True
+        keep_running_socket = True
         while keep_running:
             
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             s.bind((self.HOST, self.PORT))
             s.listen(1)
-            conn, addr = s.accept()
-            print('Connected by', addr)
-            while keep_running:
+            #conn, addr = s.accept() (moved by Spencer into while loop 5/19/21)
+            #print('Connected by', addr)
+            while keep_running_socket:
+                conn, addr = s.accept()
+                print('Connected by', addr)
                 cmd = conn.recv(1024)
                 print(cmd.decode())
                 if not cmd: break
-                
+        
                 if cmd.decode() == 'EXIT':
                     conn.send(bytes('Server exiting.', 'utf-8'))
                     print('Server exiting.')
                     sleep(0.1)
+                    keep_running_socket = False
                     keep_running = False
                 elif cmd.decode() == 'CLOSE':
                     conn.send(b'Closing connection.')
-                    print('Client ({0}, {1}) disconnected.'.format(self.HOST, self.PORT))
+                    #print('Client ({0}, {1}) disconnected.'.format(self.HOST, self.PORT))
+                    print('Client {0} disconnected.'.format(addr))
                     sleep(0.1)
                     conn.close()
                     # s.close()
-                    keep_running = False
+                    keep_running_socket = True #changed from False by Spencer 5/19/21
                 else:
                     try:
                         cmd = b'ppms.' + cmd
@@ -64,7 +69,7 @@ class Server():
                         conn.sendall(b'QDInstrument Command not recognized.')
             
             
-            conn.close()
+            #conn.close() (commented out by Spencer 5/19/21)
             
 
 
