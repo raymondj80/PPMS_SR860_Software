@@ -12,22 +12,17 @@ import random
 import plotly.graph_objs as go
 from time import sleep
 import pandas as pd
+from helper import RemoteQDHelper
 
 queue = []
-# dict = {'Name':['Martha', 'Tim', 'Rob', 'Georgia'],
-#         'Maths':[87, 91, 97, 95],
-#         'Science':[83, 99, 84, 76]
-#        }
-# df = pd.DataFrame(dict)
-
-
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 buttonText = 'Start'
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 df = pd.DataFrame(
     columns = ['task', 'target value', 'target rate', 'timestamp']
-    )  
+    )
+rdqh = RemoteQDHelper()
      
 app.layout = html.Div(
     [
@@ -64,7 +59,7 @@ app.layout = html.Div(
                             ),
                             html.Button('Add', id='add-command', n_clicks=0),
                             dash_table.DataTable(
-                                id='adding-rows-table',
+                                id='task-queue',
                                 columns=[{
                                     'name': i,
                                     'id': i,
@@ -77,7 +72,26 @@ app.layout = html.Div(
                       ),
                         ]),
                         html.Div(id='body-div'),
-                        daq.StopButton(buttonText=buttonText, id='submit-val', n_clicks=0)
+                        daq.StopButton(buttonText='Start', id='start-button', n_clicks=0),
+                        daq.StopButton(buttonText='Stop', id='stop-button', n_clicks=0),
+                        html.Div(id='queue-output'),
+                        daq.Gauge(
+                            showCurrentValue=True,
+                            id='gauge-temp',
+                            label='temperature',
+                            max=400,
+                            min=0,
+                            value=6
+                        ),
+                        daq.Gauge(
+                            id='gauge-field',
+                            label='field',
+                            value=6
+                        ),
+                        dcc.Interval(
+                            id='gauge-update',
+                            interval=1000
+                        )
         ]),
         dcc.Tab(label='Graphs', children=[
             dcc.Graph(id='live-graph', animate=True),
@@ -105,10 +119,10 @@ def update_input_rate(value):
     return "{} rate".format(value)
 
 @app.callback(
-    Output('adding-rows-table', 'data'),
+    Output('task-queue', 'data'),
     Input('add-command', 'n_clicks'),
-    State('adding-rows-table', 'data'),
-    State('adding-rows-table', 'columns'),
+    State('task-queue', 'data'),
+    State('task-queue', 'columns'),
     State(component_id='param',component_property='value'),
     State(component_id='target_val', component_property='value'),
     State(component_id='rate', component_property='value'))
@@ -117,59 +131,25 @@ def add_row(n_clicks, rows, columns, param, target_val, rate):
         rows.append({'task': param, 'target value':target_val, 'target rate': rate, 'timestamp': ''})
     return rows
 
-
-# @app.callback(Output('live-graph', 'figure'),
-#                 [Input('graph-update', 'n_intervals')])
-# def update_graph(input_data):
-#     global X
-#     global Y
-#     X.append(X[-1]+1)
-#     Y.append(Y[-1]+Y[-1]*random.uniform(-0.1,0.1))
-#     data = go.Scatter(
-#         x=list(X),
-#         y=list(Y),
-#         name='Scatter',
-#         mode = 'lines+markers'
-#     )
-#     return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)]),
-#                                                 yaxis = dict(range=[min(Y), max(Y)])
-#     )}
-
-# @app.callback(
-#     Output(component_id='table', component_property=''),
-#     Input(component_id='add-command', component_property='n_clicks'),
-
-# )
-# def update_queue(param,target_val,rate,n_clicks):
-#     #g current date and time
-#     now = datetime.now()
-#     n_clicks = None
-#     if n_clicks != None:
-#         df2 = {'task': param, 'target value':target_val, 'target rate': rate, 'timestamp': datetime.now(now)}
-#         df = df.append(df2, ignore_index = True)
-#         print("hi")
-
-#     return df.to_dict('records')
-
-# @app.callback(
-#     Output('table', 'columns'),
-#     Input('add-command', 'n_clicks'),
-#     State('table', 'data'),
-#     State('table', 'columns'))
-# def add_row(n_clicks, rows, columns):
-#     if n_clicks > 0:
-#         rows.append({c['id']: '' for c in columns})
-#     return rows
+@app.callback(
+    Output('queue-output', 'children'),
+    Input('start-button', 'n_clicks'),
+    State('task-queue', 'data'),
+    State('task-queue', 'columns')
+)
+def start_queue(n_clicks, rows, columns):
+    df = pd.DataFrame(rows, columns=[c['name'] for c in columns])
+    if n_clicks > 0:
+        return df.to_string()
 
 @app.callback(
-    Output(component_id='submit-val', component_property='buttonText'),
-    Input(component_id='submit-val', component_property='n_clicks')
-)
-def toggle_queue(n_clicks):
-    if n_clicks != None:
-        buttonText = 'False'
-        
-        
+    Output('gauge-temp', 'value'),
+    Input('gauge-update', 'n_intervals')
+)    
+def update_gauge():
+    print(rdqh.get_temp())
+    return rdqh.get_temp()
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
