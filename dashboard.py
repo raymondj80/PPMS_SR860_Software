@@ -12,9 +12,12 @@ import random
 import plotly.graph_objs as go
 from time import sleep
 import pandas as pd
-from helper import RemoteQDHelper
+from RemoteQDInstrument import remoteQDInstrument
+from server_params import _HOST, _PORT
 
 queue = []
+
+# rQD.temperature
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 buttonText = 'Start'
@@ -22,7 +25,6 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 df = pd.DataFrame(
     columns = ['task', 'target value', 'target rate', 'timestamp']
     )
-rdqh = RemoteQDHelper()
      
 app.layout = html.Div(
     [
@@ -86,12 +88,16 @@ app.layout = html.Div(
                         daq.Gauge(
                             id='gauge-field',
                             label='field',
+                            max=9,
+                            min=-9,
+
                             value=6
                         ),
-                        dcc.Interval(
-                            id='gauge-update',
-                            interval=1000
-                        )
+                        html.Button('Gauge', id='gauge-button', n_clicks=0)
+                        # dcc.Interval(
+                        #     id='gauge-update',
+                        #     interval=5000
+                        # )
         ]),
         dcc.Tab(label='Graphs', children=[
             dcc.Graph(id='live-graph', animate=True),
@@ -139,17 +145,34 @@ def add_row(n_clicks, rows, columns, param, target_val, rate):
 )
 def start_queue(n_clicks, rows, columns):
     df = pd.DataFrame(rows, columns=[c['name'] for c in columns])
+    # print('hi')
     if n_clicks > 0:
         return df.to_string()
 
-@app.callback(
-    Output('gauge-temp', 'value'),
-    Input('gauge-update', 'n_intervals')
-)    
-def update_gauge():
-    print(rdqh.get_temp())
-    return rdqh.get_temp()
+# @app.callback(
+#     Output('gauge-temp', 'value'),
+#     Input('gauge-button', 'n_clicks')
+# )    
+# def update_gauge_temp(n_clicks):
+#     if n_clicks > 0:
+#         rQD = remoteQDInstrument(instrument_type="DYNACOOL",host=_HOST, port=_PORT)
+#         rQD.connect_socket()
+#         temp=rQD.temperature
+#         rQD.close_socket()
+#         return float(temp)
 
+
+@app.callback(
+    Output('gauge-field', 'value'),
+    Input('gauge-button', 'n_clicks')
+)    
+def update_gauge_field(n_clicks):
+    if n_clicks > 0:
+        rQD = remoteQDInstrument(instrument_type="DYNACOOL",host=_HOST, port=_PORT)
+        rQD.connect_socket()
+        field=rQD.field
+        rQD.close_socket()
+        return float(field)
 
 if __name__ == '__main__':
     app.run_server(debug=True)
