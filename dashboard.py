@@ -12,17 +12,15 @@ import random
 import plotly.graph_objs as go
 from time import sleep
 import pandas as pd
-from helper import RemoteQDHelper
 
 queue = []
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-buttonText = 'Start'
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+global df
 df = pd.DataFrame(
-    columns = ['task', 'target value', 'target rate', 'timestamp']
-    )
-rdqh = RemoteQDHelper()
+    columns = ['task', 'target value', 'target rate','wait','timestamp']
+    )  
      
 app.layout = html.Div(
     [
@@ -76,22 +74,16 @@ app.layout = html.Div(
                         daq.StopButton(buttonText='Stop', id='stop-button', n_clicks=0),
                         html.Div(id='queue-output'),
                         daq.Gauge(
-                            showCurrentValue=True,
-                            id='gauge-temp',
+                            id='temp',
                             label='temperature',
-                            max=400,
-                            min=0,
                             value=6
                         ),
                         daq.Gauge(
-                            id='gauge-field',
+                            id='field',
                             label='field',
                             value=6
-                        ),
-                        dcc.Interval(
-                            id='gauge-update',
-                            interval=1000
                         )
+
         ]),
         dcc.Tab(label='Graphs', children=[
             dcc.Graph(id='live-graph', animate=True),
@@ -131,24 +123,37 @@ def add_row(n_clicks, rows, columns, param, target_val, rate):
         rows.append({'task': param, 'target value':target_val, 'target rate': rate, 'timestamp': ''})
     return rows
 
+
+# @app.callback(Output('live-graph', 'figure'),
+#                 [Input('graph-update', 'n_intervals')])
+# def update_graph(input_data):
+#     global X
+#     global Y
+#     X.append(X[-1]+1)
+#     Y.append(Y[-1]+Y[-1]*random.uniform(-0.1,0.1))
+#     data = go.Scatter(
+#         x=list(X),
+#         y=list(Y),
+#         name='Scatter',
+#         mode = 'lines+markers'
+#     )
+#     return {'data':[data], 'layout': go.Layout(xaxis = dict(range=[min(X), max(X)]),
+#                                                 yaxis = dict(range=[min(Y), max(Y)])
+#     )}
+
+
 @app.callback(
     Output('queue-output', 'children'),
-    Input('start-button', 'n_clicks'),
+    Input('start-button','n_clicks'),
     State('task-queue', 'data'),
     State('task-queue', 'columns')
 )
-def start_queue(n_clicks, rows, columns):
+def start_queue(n_clicks,rows, columns):
     df = pd.DataFrame(rows, columns=[c['name'] for c in columns])
     if n_clicks > 0:
+        #run intermediary function
+        #ramp_temp()
         return df.to_string()
-
-@app.callback(
-    Output('gauge-temp', 'value'),
-    Input('gauge-update', 'n_intervals')
-)    
-def update_gauge():
-    print(rdqh.get_temp())
-    return rdqh.get_temp()
 
 
 if __name__ == '__main__':
