@@ -4,10 +4,18 @@ from time import sleep
 import datetime
 
 from states import temperatureStates, fieldStates, chamberStates
-from server_params import _HOST, _PORT
+
+# Params Raymond 5/27
+
+HEADER = 1024
+PORT = 5050
+SERVER = socket.gethostbyname(socket.gethostname())
+ADDR = (SERVER, PORT)
+FORMAT = 'utf-8'
+DISCONNECT_MSG = "!DISCONNECT"
 
 class remoteQDInstrument:
-    def __init__(self, instrument_type, host=_HOST, port=_PORT):
+    def __init__(self, instrument_type, host=SERVER, port=PORT):
         instrument_type = instrument_type.upper()
         if instrument_type == 'DYNACOOL':
             self._class_id = 'QD.MULTIVU.DYNACOOL.1'
@@ -21,25 +29,29 @@ class remoteQDInstrument:
             self._class_id = 'QD.MULTIVU.OPTICOOL.1'
         else:
             raise Exception('Unrecognized instrument type: {0}.'.format(instrument_type))
-        self._host = host
-        self._port = port
+        self._host = SERVER
+        self._port = PORT
         self._server_address = (self._host,self._port)
     
     def connect_socket(self, setblocking=False):
         # Create a TCP/IP socket
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sock=sock
-        self.sock.connect((self._host,self._port))
-        print(sys.stderr, 'connecting to %s port %s' %(self._server_address))
-        
+        client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock=client 
+        self.sock.connect(ADDR)
+        print(sys.stderr, "[CONNECTING] Connecting to %s port %s" %(self._server_address))
         sleep(1)
         self.sock.setblocking(setblocking)
         self._remote_address = self.sock.getsockname()
 
     def send_message(self, message):
-        self.sock.sendall(bytes(message, "utf-8"))
+        msg_length = len(message)
+        send_length = str(msg_length).encode(FORMAT)
+        # Pad with spaces
+        send_length += b' ' * (HEADER - len(send_length))
+        self.sock.send(send_length)
+        self.sock.sendall(bytes(message, FORMAT))
         sleep(0.8)
-        response = self.sock.recv(1024).decode('utf-8')
+        response = self.sock.recv(HEADER).decode(FORMAT)
         sleep(0.8)
         return response
         

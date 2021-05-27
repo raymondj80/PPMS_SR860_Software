@@ -40,7 +40,6 @@ class Server():
                 cmd = conn.recv(1024)
                 print(cmd.decode())
                 if not cmd: break
-        
                 if cmd.decode() == 'EXIT':
                     conn.send(bytes('Server exiting.', 'utf-8'))
                     print('Server exiting.')
