@@ -6,13 +6,12 @@ import datetime
 from states import temperatureStates, fieldStates, chamberStates
 
 # Params Raymond 5/27
-
 HEADER = 1024
-PORT = 5050
-SERVER = socket.gethostbyname(socket.gethostname())
+PORT = 5000
+SERVER = "localhost"
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
-DISCONNECT_MSG = "!DISCONNECT"
+DISCONNECT_MSG = "CLOSE"
 
 class remoteQDInstrument:
     def __init__(self, instrument_type, host=SERVER, port=PORT):
@@ -44,11 +43,11 @@ class remoteQDInstrument:
         self._remote_address = self.sock.getsockname()
 
     def send_message(self, message):
-        msg_length = len(message)
-        send_length = str(msg_length).encode(FORMAT)
-        # Pad with spaces
-        send_length += b' ' * (HEADER - len(send_length))
-        self.sock.send(send_length)
+        # msg_length = len(message)
+        # send_length = str(msg_length).encode(FORMAT)
+        # # Pad with spaces
+        # send_length += b' ' * (HEADER - len(send_length))
+        # self.sock.send(send_length)
         self.sock.sendall(bytes(message, FORMAT))
         sleep(0.8)
         response = self.sock.recv(HEADER).decode(FORMAT)

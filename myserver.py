@@ -4,6 +4,14 @@ from time import sleep
 
 from server_params import _HOST, _PORT
 
+
+HEADER = 1024
+PORT = 5000
+SERVER = "localhost"
+ADDR = (SERVER, PORT)
+FORMAT = 'utf-8'
+DISCONNECT_MSG = 'CLOSE'
+
 def run_server(host=_HOST, port=_PORT, verbose=True):
     '''Run a QDInstrument server'''
     server = Server(host, port)
@@ -30,7 +38,7 @@ class Server():
             
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            s.bind((self.HOST, self.PORT))
+            s.bind(ADDR)
             s.listen(1)
             #conn, addr = s.accept() (moved by Spencer into while loop 5/19/21)
             #print('Connected by', addr)

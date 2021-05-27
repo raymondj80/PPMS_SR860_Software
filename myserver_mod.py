@@ -5,13 +5,12 @@ from qdinstrument import QDInstrument
 
 
 HEADER = 1024
-PORT = 5050
-SERVER = socket.gethostbyname(socket.gethostname())
+PORT = 5000
+SERVER = "localhost"
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MSG = 'CLOSE'
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.bind(ADDR)
+
 
 def run_server(host=SERVER, port=PORT, verbose=True):
     '''Run a QDInstrument server'''
@@ -28,7 +27,11 @@ class Server():
         self.ppms = QDInstrument(instrument_name.upper())
 
     def start(self, verbose):
-        server.listen()
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind(ADDR)
+        server.listen(1)
+        ppms = self.ppms 
         print(f"[LISTENING] Server is listening on {SERVER}")
         while True:
             try:
@@ -44,33 +47,32 @@ class Server():
 
     def handle_client(self, conn, addr, verbose=False):
         print(f"[NEW CONNECTION] {addr} connected.")
-
         running = True
         while running:
-            msg_length = conn.recv(HEADER).decode(FORMAT)
-            if msg_length:
-                msg_length = int(msg_length)
-                msg = conn.recv(HEADER)
+            # msg_length = conn.recv(HEADER).decode(FORMAT)
+            # if msg_length:
+            #     msg_length = int(msg_length)
+            msg = conn.recv(HEADER)
 
-                if msg.decode(FORMAT) == DISCONNECT_MSG:
-                    running = False
-                    print(f"[DISCONNECTING] {addr} has been disconnected.")
+            if msg.decode(FORMAT) == DISCONNECT_MSG:
+                running = False
+                print(f"[DISCONNECTING] {addr} has been disconnected.")
 
-                else:
-                    try:
-                        msg = b'ppms.' + msg
+            else:
+                try:
+                    msg =  b'ppms.' + msg
 
-                        if verbose:
-                            print(f"[{addr}] {msg}")
+                    if verbose:
+                        print(f"[{addr}] {msg.decode()}")
 
-                        if b'=' in msg:
-                            exec(msg)
-                            response = 'True'
-                        else:
-                            response = str(eval(msg))
-                        conn.sendall(response.encode())
-                    except (SyntaxError, NameError, AttributeError):
-                        conn.sendall(b'QDInstrument Command not recognized.')
+                    if b'=' in msg:
+                        exec(msg)
+                        response = 'True'
+                    else:
+                        response = str(eval(msg))
+                    conn.sendall(response.encode())
+                except (SyntaxError, NameError, AttributeError):
+                    conn.sendall(b'QDInstrument Command not recognized.')
                     
         
         conn.close()
